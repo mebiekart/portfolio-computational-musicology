@@ -27,3 +27,88 @@ Because adding music from *every* opera and musical would create a very big corp
   * Totally Fucked - Spring Awakening: this comes close to a rock song, which is a different genre than most musical songs. 
   * Land of Lola - Kinky Boots: this song has a strong disco vibe, with more use of electronic instruments than the average musical song.
 
+## Downloading the corpus
+```{r}
+# Load necessary packages
+library(tidyverse)
+library(spotifyr)
+```
+```{r}
+# Load playlists 
+opera_playlist <- get_playlist_audio_features("", "1rM8PQnCL3unpZENj2xdFa")
+musical_playlist <- get_playlist_audio_features("", "7A2ifENYPFKuxloYPlYWtZ")
+
+# Combine playlist into one corpus
+corpus <-
+  bind_rows(
+    opera_playlist %>% mutate(category = "Opera Tracks"),
+    musical_playlist %>% mutate(category = "Musical Tracks")
+  )
+```
+
+## Data visualisation
+```{r}
+ggplot(corpus, aes(energy, valence, size = danceability, color = tempo)) +
+  geom_jitter(alpha = 0.3) +
+  facet_wrap(~category) +
+  theme_minimal() +
+  labs(title = "Valence vs Energy for Musical and Opera Tracks",
+       x = "Energy",
+       y = "Valence",
+       size = "Danceability",
+       color = "Tempo") +
+  scale_x_continuous(limits = c(-0.1, 1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     minor_breaks = NULL) +
+  scale_y_continuous(limits = c(0, 1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     minor_breaks = NULL) +
+  geom_rug(size = 0.1) +
+  geom_text(aes(x = energy, y = valence, label = label),
+            data = tibble(label = c("Memory (Cats)", "La serva padrona: Intermezzo I"),
+                          category = c("Musical Tracks", "Opera Tracks"),
+                          energy = c(0.00803, 0.04950),
+                          valence = c(0.1220, 0.6450),
+                          danceability = c(0.261, 0.6440),
+                          tempo = c(74.153, 116.443)),
+            size = 3,
+            hjust = "left",
+            vjust = "bottom",
+            nudge_x = -0.05,
+            nudge_y = 0.04)
+```
+
+```{r}
+ggplot(corpus, aes(energy, fill = category)) +
+  geom_histogram(position = "dodge", binwidth = 0.1) +
+  theme_minimal() +
+  labs(title = "Energy of Muscial and Opera Tracks",
+       x = "Energy",
+       y = "Count")
+```
+```{r}
+ggplot(corpus, aes(valence, fill = category)) +
+  geom_histogram(position = "dodge", binwidth = 0.12) +
+  theme_minimal() +
+  labs(title = "Valence of Musical and Opera Tracks",
+       x = "Valence",
+       y = "Count")
+```
+
+```{r}
+ggplot(corpus, aes(danceability, fill = category)) +
+  geom_histogram(position = "dodge", binwidth = 0.1) +
+  theme_minimal() +
+  labs(title = "Danceability of Musical and Opera Tracks",
+       x = "Danceability",
+       y = "Count")
+```
+```{r}
+ggplot(corpus, aes(tempo, fill = category)) +
+  geom_histogram(position = "dodge", binwidth = 50) +
+  theme_minimal() +
+  labs(title = "Tempo of Musical and Opera Tracks",
+       x = "Tempo",
+       y = "Count")
+```
+
