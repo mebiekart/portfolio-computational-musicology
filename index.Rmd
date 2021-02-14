@@ -65,7 +65,7 @@ ggplot(corpus, aes(energy, valence, size = danceability, color = tempo)) +
                      minor_breaks = NULL) +
   geom_rug(size = 0.1) +
   geom_text(aes(x = energy, y = valence, label = label),
-            data = tibble(label = c("Memory (Cats)", "La serva padrona: Intermezzo I"),
+            data = tibble(label = c("Memory", "Stizzoso, mio stizzoso, voi fate il borioso"),
                           category = c("Musical Tracks", "Opera Tracks"),
                           energy = c(0.00803, 0.04950),
                           valence = c(0.1220, 0.6450),
@@ -77,7 +77,46 @@ ggplot(corpus, aes(energy, valence, size = danceability, color = tempo)) +
             nudge_x = -0.05,
             nudge_y = 0.04)
 ```
+\
+I started by visualizing the distribution of valence against energy for both musical and opera tracks. Furthermore, this plot shows the danceability and tempo of the songs in my corpus. As I expected, musical tracks cover a wider range of valence and energy than opera tracks. I think this might be because musicals can be written in a variety of different styles/genres, whereas operas often have the same style. \
+I was surprised by the fact that the graph shows so little difference between opera tracks, I would've expected at least a little more variety. \
+Furthermore, as expected, musical songs are generally more danceable than opera songs. It is interesting that musical tracks seem to have a linear relationship: the more energy a track has, the higher the valence. This would mean that there are not many relaxed or angry musical songs. \
+I highlighted one outlier in both groups. Memory (from the musical Cats) is a particular sad musical song, while Stizzoso, mio stizzoso, voi fate il borioso (from the opera La Serva Padrona) is a particular happy opera song (and also turns out the be the most danceable opera song). \
+Because the opera songs are not distributed in an even way, it is hard to see the data. That's why I decided to take a closer look. 
+\
 
+```{r}
+ggplot(opera_playlist, aes(energy, valence, color = tempo, size = danceability)) +
+  geom_jitter(alpha = 0.3) +
+  theme_minimal() +
+  scale_x_continuous(limits = c(0, 0.7),
+                     breaks = c(0, 0.25, 0.5, 0.7),
+                     minor_breaks = NULL) +
+  scale_y_continuous(limits = c(0, 0.7),
+                     breaks = c(0, 0.25, 0.5, 0.7),
+                     minor_breaks = NULL) +
+  geom_rug(size = 0.1) +
+  labs(title = "Valence vs Energy for Opera Tracks",
+       x = "Energy",
+       y = "Valence",
+       color = "Tempo",
+       size = "Danceability") +
+  geom_text(aes(x = energy, y = valence, label = label),
+            data = tibble(label = c("Et maintenant je dois offrir "),
+                          energy = c(0.58200),
+                          valence = c(0.2310),
+                          danceability = c(0.2890),
+                          tempo = c(96.930)),
+            size = 3,
+            hjust = "left",
+            vjust = "bottom",
+            nudge_x = -0.12,
+            nudge_y = 0.04)
+```
+\
+In this plot, another outlier stands out: Et maintenant je dois offrir (from the opera Les Huguenots) has the highest energy of all opera songs in the corpus. I manually chose different x and y limits for this plot, so the datapoints are somewhat clearer now. However, they are still very much clustered together in the low-Energy-low-Valence corner. \
+The tempo and danceability features are quite hard to read from these graphs, so I made seperate histograms for each features to get more insight into the two groups. 
+\
 ```{r}
 ggplot(corpus, aes(energy, fill = category)) +
   geom_histogram(position = "dodge", binwidth = 0.1) +
@@ -86,29 +125,39 @@ ggplot(corpus, aes(energy, fill = category)) +
        x = "Energy",
        y = "Count")
 ```
+\
+Almost all opera songs have an energy value between 0 and 0.25. However, musical songs are much more distributed and generally have more energy. \
+
 ```{r}
 ggplot(corpus, aes(valence, fill = category)) +
-  geom_histogram(position = "dodge", binwidth = 0.12) +
+  geom_histogram(position = "dodge", binwidth = 0.1) +
   theme_minimal() +
   labs(title = "Valence of Musical and Opera Tracks",
        x = "Valence",
        y = "Count")
 ```
+\
+It is quite surprising to me that so many opera songs have such a low valence value. This suggests that almost all opera songs in my corpus are sad. Furthermore, I expected musical songs to be even happier, i.e., to have more songs in the corpus with valence values between 0.75 and 1. \
 
 ```{r}
 ggplot(corpus, aes(danceability, fill = category)) +
-  geom_histogram(position = "dodge", binwidth = 0.1) +
+  geom_histogram(position = "dodge", binwidth = 0.25) +
   theme_minimal() +
   labs(title = "Danceability of Musical and Opera Tracks",
        x = "Danceability",
        y = "Count")
 ```
+\
+As expected, musical songs are more danceable than opera songs. However, I expected to find more musical songs with danceability values between 0.75 and 1.
+\
 ```{r}
 ggplot(corpus, aes(tempo, fill = category)) +
   geom_histogram(position = "dodge", binwidth = 50) +
   theme_minimal() +
   labs(title = "Tempo of Musical and Opera Tracks",
-       x = "Tempo",
+       x = "Tempo (BPM)",
        y = "Count")
 ```
-
+\
+Out of all features I measured, opera and musical tracks are most similar in tempo. This is surprising to me, because I would've thought musical songs have much higher tempo than opera songs.
+\
