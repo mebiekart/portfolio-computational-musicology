@@ -51,12 +51,25 @@ corpus <-
     musical_playlist %>% mutate(category = "Musical Tracks")
   )
 
+# Create customized theme
+theme_plts <- function() {
+    theme_minimal() +
+    theme(
+       text = element_text(family = "Bookman", color = "gray25"),
+    plot.subtitle = element_text(size = 12),
+    plot.caption = element_text(color = "gray30"),
+    plot.background = element_rect(fill = "gray95"),
+    plot.margin = unit(c(5, 10, 5, 10), units = "mm")
+    )
+}
+
 # Create plot
 val_en_plot <- ggplot(corpus, aes(energy, valence, size = danceability, color = tempo, label = track.name)) +
   geom_jitter(alpha = 0.3) +
   facet_wrap(~category) +
-  theme_minimal() +
-  labs(title = "Musical Songs are Happier than Opera Songs",
+  theme_plts() +
+  labs(title = "Yes, Musical Songs are Happier than Opera Songs",
+       subtitle = "Comparing Valence and Energy of Musical and Opera Tracks",
        x = "Energy",
        y = "Valence",
        size = "Danceability",
@@ -69,7 +82,12 @@ val_en_plot <- ggplot(corpus, aes(energy, valence, size = danceability, color = 
                      minor_breaks = NULL) +
   geom_rug(size = 0.1) 
 
-ggplotly(val_en_plot)
+ggplotly(val_en_plot) %>%
+  layout(title = list(text = paste0("Yes, Musical Songs are Happier than Opera Songs",
+                                    "<br>",
+                                    "<sup>",
+                                    "Comparing Valence and Energy of Musical and Opera Tracks",
+                                    "</sup>")))
   
 ```
 
@@ -94,7 +112,8 @@ ggplot(opera_playlist, aes(energy, valence, color = tempo, size = danceability))
                      breaks = c(0, 0.25, 0.5, 0.7),
                      minor_breaks = NULL) +
   geom_rug(size = 0.1) +
-  labs(title = "Valence vs Energy for Opera Tracks",
+  labs(title = "Opera Songs are Sad and Low in Energy",
+       subtitle = "Valence vs Energy for Opera Tracks",
        x = "Energy",
        y = "Valence",
        color = "Tempo",
