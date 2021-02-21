@@ -148,7 +148,7 @@ Given this definition, I think it is **not surprising that opera songs are low i
 
 As for the low valence values for opera songs: I think this can be explained by the fact that **many operas are tragedies, so using sad songs in these stories makes total sense**. 
 
-### What's so special about Stizzoso, mio stizzoso, voi fate il borioso?
+### What's so special about "Stizzoso, mio stizzoso, voi fate il borioso"?
 
 ```{r}
 library(compmus)
@@ -160,6 +160,7 @@ stizzoso <-
   unnest(segments) %>%
   select(start, duration, pitches)
 
+# Make chromagram
 stizzoso %>%
   mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
   compmus_gather_chroma() %>% 
@@ -180,6 +181,45 @@ stizzoso %>%
 ***
 
 Here, you see a **chomagram** of the song "Stizzoso, mio stizzoso, voi fate il borioso" (from the opera *La Serva Padrona*). The norm for the chroma vectors used here is **euclidean**. I chose this norm because it made the patterns in the chromagram the clearest of all three possible norms. 
+
+What you can tell from this chromagram is that the song mainly jumps from E to A. You can here these jumps quite well in the song (you can listen to it [here](https://open.spotify.com/track/54cfPjBAIjMcbTNhamfBty?si=HdIT_e20SGq0ZDYbsZj-OA)). Other than that, it is quite hard to tell what the chromagram represents, because it's kind of all over the place. 
+
+In order to make the analyisis of this song more meaningful, **I compared its chromagram to the chromagram of a very average song in my corpus**: "Gluck, das mir verblieb" (from the opera *Die Tote Stadt*). You can find this chromagram in the next tab (and listen to it [here](https://open.spotify.com/track/47xZ59XjNaGgnmWy2X1WUL?si=Dc6ejH_zQVGeJ7e2cwmUyQ)). 
+
+What you can see in this chromagram is that the two mainly used pitches in the song (F and A#) are much clearer. Maybe this means that "Stizzoso, mio stizzoso, voi fate il borioso" just has more different pitches in it.
+
+When you listen to the two songs, it makes sense that Spotify classifies "Stizzoso, mio stizzoso, voi fate il borioso" to be much happier than "Gluck, das mir verblieb". The former has lots of happy violins in it, while the latter is very melodramatic. 
+
+### What does an average opera track look like? Chromagram of the song "Gluck, das mir verblieb"
+
+```{r}
+tote_stadt <-
+  get_tidy_audio_analysis("47xZ59XjNaGgnmWy2X1WUL") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+tote_stadt %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+
+***
+
+Here, you see a **chomagram** of the song "Gluck, das mir verblieb" (from the opera *Die Tote Stadt*). The norm for the chroma vectors used here is **euclidean**.
+
 
 
 
