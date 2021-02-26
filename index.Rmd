@@ -8,7 +8,115 @@ output:
     theme: lumen
 ---
 
-### What kind of corpus did I choose and why?
+### Investigating my favourite musical song (**chroma-based self-similarity matrix**).
+
+```{r}
+library(tidyverse)
+library(spotifyr)
+library(compmus)
+
+tf <-
+  get_tidy_audio_analysis("1RZ6jzlPeEaDeKYe7IJ792") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+tf %>%
+  compmus_self_similarity(pitches, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+```
+
+***
+
+Here, you can see a **chroma-based self-similarity matrix for the song America (West Side Story)**. The norm used is euclidean, the distance metric used is cosine, and the summary statistic used is root mean square. The Spotify segment used is "bars". You can listen to the song [here](https://open.spotify.com/track/1RZ6jzlPeEaDeKYe7IJ792?si=FZyFmQEIQf25DEVnDXvF7g).
+
+A few things about this SSM stand out to me. First, you can see that a very **clear line** appears around 50 seconds. This indicates a novelty in the song: at this time point, you can probably hear a unique pitch in the song. When you listen to the song, you can hear that this is indeed a turning point in the song. The time point seems to correspond with the transition of the intro into the first chorus. More specifically, the 50 second time mark precisely corresponds to the "I know you do!" exclamation.
+
+Secondly, you can see several **diagonal lines** parallel to the main diagonal from around 120 seconds until the end of the song. Diagonal lines indicate repetitions in the song. This pattern makes sense, because from this time mark onward the song basically only consists of repetitions. At 120 seconds, the main instrumental part of the song begins, and this pattern is repeated throughout the song.
+
+Finally, there are **3 visible distinct parts** of the song. 0-50 seconds indicates the intro of the song. Then, there is a block between 50 and 120 seconds, which consists of the first verses and chorus with relatively few musical instruments. After 120 seconds, the part starts and the energy of the song increases. 
+
+### Investigating my favourite musical song (**timbre-based self-similarity matrix**). 
+
+```{r}
+library(tidyverse)
+library(spotifyr)
+library(compmus)
+
+tf <-
+  get_tidy_audio_analysis("1RZ6jzlPeEaDeKYe7IJ792") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+tf %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+```
+
+*** 
+
+Here, you can see a **timbre-based self-similarity matrix for the song America (West Side Story)**. The norm used is euclidean, the distance metric used is cosine, and the summary statistic used is root mean square. The Spotify segment used is "bars". You can listen to the song [here](https://open.spotify.com/track/1RZ6jzlPeEaDeKYe7IJ792?si=FZyFmQEIQf25DEVnDXvF7g).
+
+The first thing I noticed when looking at this SSM, is that it is a little different from the chroma-based SSM for this song. Here, instead of the clear line at the 50 seconds time mark, you can find a **clear line** right at the beginning of the song. This line indicates a unique appearance of timbre/instruments in the song. Indeed, the very beginning of the song (first 10 seconds) consists of some kind of percussion which is not strongly present in the rest of the song.
+
+Interestingly enough, the timbre-based SSM does not really show the transition of the intro into the rest of the song (which was clearly visible in the chroma-based SSM). However, you can see that the song can be divided into **2 main parts**: 0-120 seconds and 120-300 seconds. The transition at 120 seconds *was* visible in the chroma-based SSM. Here, the "big" instruments tune in and the energy is turned up (and the big dancing scene begins). 
+
+### What kind of **corpus** did I choose and why?
 
 The corpus that I use for my portfolio will consist of 100 opera songs and 100 musical songs, collected from pre-existing playlists that are available on Spotify. I use Spotify's *Opera 100: Spotify Picks* playlist as a basis for my opera playlist. This playlist consists of 97 tracks, so I have added 3 tracks manually, based on Spotify's suggestions. For my musical playlist, I use a public playlist called *BROADWAY MUSICALS*, made by Hugo Torres. Out of all musical playlists I could find, I found this to be the most inclusive. Furthermore, I chose to focus on Broadway musicals because they were written to be performed in front of a live audience, just like operas. The original playlist consists of 150 songs, so I manually removed 50 tracks. I chose to remove tracks from musicals which had more tracks in the playlist, in order to create a playlist with as much different musicials as possible. \
 I chose this corpus because I have always been fascinated by musicals. More recently, I was introduced to operas and I recognized the same compelling drama I appreciate in musicals. Opera songs and musical songs both mainly serve to tell a story, but have very different styles. I wonder if opera and musical music share certain aspects, because they both have such a strong narrative function. \ \
@@ -31,8 +139,12 @@ Ride of the Valkyries - Die Walkure: this song has no lyrics, which is atypical 
 Totally Fucked - Spring Awakening: this comes close to a rock song, which is a different genre than most musical songs. \
 Land of Lola - Kinky Boots: this song has a strong disco vibe, with more use of electronic instruments than the average musical song.
 
+You can check out the musical part of my corpus [here](https://open.spotify.com/playlist/7A2ifENYPFKuxloYPlYWtZ?si=qrb6LdriTd6-BQXtlyKK0A).
 
-### Are musical songs really happier than opera songs?
+You can check out the opera part of my corpus [here](https://open.spotify.com/playlist/1rM8PQnCL3unpZENj2xdFa?si=yGHvlpXgSvWbteMkRLRrZA)
+
+
+### Are musical songs really happier than opera songs? An **interactive visualization**.
 
 ```{r}
 # Load necessary packages
@@ -103,7 +215,7 @@ Take a look at the clear **outliers in both groups**. Memory (from the musical *
 
 Because the opera songs are not distributed in an even way, it is hard to see the data. That's why I decided to take a closer look. 
 
-### Take a closer look on the opera playlist
+### Take a closer look on the opera playlist. A **static visualization**.
 
 ```{r}
 ggplot(opera_playlist, aes(energy, valence, color = tempo, size = danceability)) +
@@ -148,7 +260,7 @@ Given this definition, I think it is **not surprising that opera songs are low i
 
 As for the low valence values for opera songs: I think this can be explained by the fact that **many operas are tragedies, so using sad songs in these stories makes total sense**. 
 
-### What's so special about "Stizzoso, mio stizzoso, voi fate il borioso"?
+### What's so special about "Stizzoso, mio stizzoso, voi fate il borioso"? Check out its **chromagram**.
 
 ```{r}
 library(compmus)
@@ -180,7 +292,7 @@ stizzoso %>%
 
 ***
 
-Here, you see a **chomagram** of the song "Stizzoso, mio stizzoso, voi fate il borioso" (from the opera *La Serva Padrona*). The norm for the chroma vectors used here is **euclidean**. I chose this norm because it made the patterns in the chromagram the clearest of all three possible norms. 
+Here, you see a **chomagram** of the song "Stizzoso, mio stizzoso, voi fate il borioso" (from the opera *La Serva Padrona*). The norm for the chroma vectors used here is **euclidean**.
 
 What you can tell from this chromagram is that the song mainly jumps from E to A. You can here these jumps quite well in the song (you can listen to it [here](https://open.spotify.com/track/54cfPjBAIjMcbTNhamfBty?si=HdIT_e20SGq0ZDYbsZj-OA)). Other than that, it is quite hard to tell what the chromagram represents, because it's kind of all over the place. 
 
@@ -190,7 +302,7 @@ What you can see in this chromagram is that the two mainly used pitches in the s
 
 When you listen to the two songs, it makes sense that Spotify classifies "Stizzoso, mio stizzoso, voi fate il borioso" to be much happier than "Gluck, das mir verblieb". The former has lots of happy violins in it, while the latter is very melodramatic. 
 
-### What does an average opera track look like? Chromagram of the song "Gluck, das mir verblieb"
+### What does an average opera track look like? **Chromagram** of the song "Gluck, das mir verblieb".
 
 ```{r}
 tote_stadt <-
