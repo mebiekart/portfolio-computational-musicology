@@ -78,3 +78,88 @@ Atypical tracks: \
             vjust = "bottom",
             nudge_x = -0.05,
             nudge_y = 0.04)
+            
+    
+### Investigating my favourite musical song (**timbre-based self-similarity matrix**). 
+
+```{r}
+library(tidyverse)
+library(spotifyr)
+library(compmus)
+
+tf <-
+  get_tidy_audio_analysis("1RZ6jzlPeEaDeKYe7IJ792") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+tf %>%
+  compmus_self_similarity(timbre, "cosine") %>% 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+```
+
+*** 
+
+Here, you can see a **timbre-based self-similarity matrix for the song America (West Side Story)**. The norm used is euclidean, the distance metric used is cosine, and the summary statistic used is root mean square. The Spotify segment used is "bars". You can listen to the song [here](https://open.spotify.com/track/1RZ6jzlPeEaDeKYe7IJ792?si=FZyFmQEIQf25DEVnDXvF7g).
+
+The first thing I noticed when looking at this SSM, is that it is a little different from the chroma-based SSM for this song. Here, instead of the clear line at the 50 seconds time mark, you can find a **clear line** right at the beginning of the song. This line indicates a unique appearance of timbre/instruments in the song. Indeed, the very beginning of the song (first 10 seconds) consists of some kind of percussion which is not strongly present in the rest of the song.
+
+Interestingly enough, the timbre-based SSM does not really show the transition of the intro into the rest of the song (which was clearly visible in the chroma-based SSM). However, you can see that the song can be divided into **2 main parts**: 0-120 seconds and 120-300 seconds. The transition at 120 seconds *was* visible in the chroma-based SSM. Here, the "big" instruments tune in and the energy is turned up (and the big dancing scene begins). 
+
+### What does an average opera track look like? **Chromagram** of the song "Gluck, das mir verblieb".
+
+```{r}
+tote_stadt <-
+  get_tidy_audio_analysis("47xZ59XjNaGgnmWy2X1WUL") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+tote_stadt %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+***
+
+Here, you see a **chomagram** of the song "Gluck, das mir verblieb" (from the opera *Die Tote Stadt*). The norm for the chroma vectors used here is **euclidean**.
+
+
