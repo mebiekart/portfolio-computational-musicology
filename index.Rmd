@@ -1,5 +1,5 @@
 ---
-title: "Portfolio Computational Musicology"
+title: "Comparing Opera and Musical Tracks"
 author: "Marijn Biekart"
 date: "February-March 2021"
 output: 
@@ -62,12 +62,14 @@ jazz %>%
     y = "SD Tempo",
     colour = "Genre",
     size = "Duration (min)",
-    alpha = "Volume (dBFS)"
+    alpha = "Volume (dBFS)",
+    title = "Opera songs tend to differ more in tempo within the same track",
+    subtitle = "Comparing tempo features of opera and musical songs"
   )
 ```
 
 ***
-Here, the **standard deviation** and **mean** of the tempo of songs in the corpus. This graph includes the first 30 songs of each playlist, because adding audio analysis for every track is a slow operation. 
+Here, the **standard deviation** and **mean** of the tempo of songs in the corpus. This graph includes the first 30 songs of each playlist, because adding audio analysis for every track is a slow operation. This selection of songs is representative for the corpus as a whole, because each playlist contains only one song from the same opera/musical and they were put together in a random order. 
 
 The graph shows a clear difference between opera and musical songs. We can conclude that **the standard deviation of musical songs is generally smaller than that of opera songs**. This means that, within the same track, opera songs tend to differ more in tempo (i.e., they have obvious slower and faster parts) than musical songs. Musical songs tend to hold on the the same tempo throughout the song. Interesting to note here is that the graph also shows a slight difference in duration for opera and musical songs. Opera songs tend to be longer, so maybe this gives more space to vary in tempo throughout a song.
 
