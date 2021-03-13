@@ -7,6 +7,43 @@ output:
     storyboard: true
     theme: lumen
 ---
+### How does Spotify's valence feature relate to the tempo of a song? Comparing **tempograms** of the musical songs with the highest and lowest valence values in my corpus.
+
+```{r, fig.show="hold", out.width="50%"}
+library(tidyverse)
+library(spotifyr)
+library(compmus)
+
+falling_slowly <- get_tidy_audio_analysis("2rqU6isUjWk7s2y0ZEkmhb") 
+
+falling_slowly %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)", title = "Low Valence: Falling Slowly") +
+  theme_classic()
+
+fame <- get_tidy_audio_analysis("7yBl8YmvcgwwYlazJcvowE") 
+
+fame %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)", title = "High Valence: Fame") +
+  theme_classic()
+```
+
+***
+
+Here, you see tempograms for [Falling Slowly (Once)](https://open.spotify.com/track/2rqU6isUjWk7s2y0ZEkmhb?si=yk7C306BSveqiEV62ztNpg) and [Fame (Fame)](https://open.spotify.com/track/7yBl8YmvcgwwYlazJcvowE?si=4l_o0EHJQtm-xCBuecBHbA). When you look at my interactive plot, you can see that Falling Slowly has the lowest valence value in the musical playlist, while Fame has the highest. There's also a substantial difference in energy values (0.124 for Falling Slowly vs. 0.73 for Fame). I was wondering whether these differences are reflected in the tempograms of the song.
+
+The short answer is: not really. Both graphs show a clear line at around 250 BPM, indicating that **the mean tempi of the song are close together**. This is reflected in my interactive plot, which shows that Spotify indicates a tempo of 128 BPM for Falling Slowly and a tempo of 131 BPM for Fame. This implies that the bright yellow lines in the tempograms actually are **tempo harmonics**. 
+
+The one noticeable **difference between the tempograms** is the fact that the one for Fame is much clearer than the one for Falling Slowly, which shows a kind of panther print. This could mean two things: either Spotify has more trouble with beat tracking in Falling Slowly, or there are more tempi changes in Falling Slowly. While listening to Falling Slowly, you can hear a small increase in tempo at around 50 seconds (also reflected in the tempogram), but other than that, I would say the tempo of the song doesn't change that much. This leads me to conclude that Spotify has more trouble detecting the tempo of this song. This could be explained by the fact you can hear very clear beats throughout Fame, while these clear beats are missing in Falling Slowly.
+
+To **answer the main question of this tab**: I can't detect a clear relation between the valence values and tempograms of Falling Slowly and Fame. Apart from the fact that Fame seems to have a stronger beat, there is no big difference in tempi. Of course, it could be the case that these songs are just not good examples. It could also be the case that the strong beat *does* relate to valence or energy somehow, but I can't draw a conclusion based on only 1 example. 
 
 ### What's the difference in tempo between opera and musical songs? Comparing **low-level audio analysis features at the playlist level**.
 
@@ -320,7 +357,7 @@ As for the low valence values for opera songs: I think this can be explained by 
 
 ### What's so special about "Stizzoso, mio stizzoso, voi fate il borioso"? Check out its **chromagram** and compare it to that of a typical opera song.
 
-```{r}
+```{r, fig.show="hold", out.width="50%"}
 library(compmus)
 
 # Load song
