@@ -7,6 +7,168 @@ output:
     storyboard: true
     theme: lumen
 ---
+
+### How well can **classifiers** distinguish between opera and musical songs?
+
+```{r, fig.show="hold", out.width="50%"}
+library(tidyverse)
+library(tidymodels)
+library(ggdendro)
+library(heatmaply)
+library(spotifyr)
+library(compmus)
+
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit %>% 
+    collect_predictions() %>% 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
+
+get_pr <- function(fit) {
+  fit %>% 
+    conf_mat_resampled() %>% 
+    group_by(Prediction) %>% mutate(precision = Freq / sum(Freq)) %>% 
+    group_by(Truth) %>% mutate(recall = Freq / sum(Freq)) %>% 
+    ungroup() %>% filter(Prediction == Truth) %>% 
+    select(class = Prediction, precision, recall)
+}  
+
+# load playlists
+opera <- 
+  get_playlist_audio_features("marijnelisa", "1rM8PQnCL3unpZENj2xdFa")
+musical <- get_playlist_audio_features("marijnelisa", "7A2ifENYPFKuxloYPlYWtZ")
+indie <-
+  bind_rows(
+    opera %>% mutate(playlist = "Opera"),
+    musical %>% mutate(playlist = "Musical")
+  ) 
+
+# get features
+indie_features <-
+  indie %>%  # For your portfolio, change this to the name of your corpus.
+  add_audio_analysis() %>% 
+  mutate(
+    playlist = factor(playlist),
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(
+        segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean",
+      )
+  ) %>%
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
+  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
+  unnest(cols = c(pitches, timbre))
+
+# define selection features
+indie_recipe <-
+  recipe(
+    playlist ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration +
+      C + `C#|Db` + D + `D#|Eb` +
+      E + `F` + `F#|Gb` + G +
+      `G#|Ab` + A + `A#|Bb` + B +
+      c01 + c02 + c03 + c04 + c05 + c06 +
+      c07 + c08 + c09 + c10 + c11 + c12,
+    data = indie_features,          # Use the same name as the previous block.
+  ) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())      # Converts to z-scores.
+  # step_range(all_predictors())    # Sets range to [0, 1].
+
+# 10-fold cross-validation
+indie_cv <- indie_features %>% vfold_cv(10)
+
+# knn model
+knn_model <-
+  nearest_neighbor(neighbors = 1) %>%
+  set_mode("classification") %>% 
+  set_engine("kknn")
+indie_knn <- 
+  workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(knn_model) %>% 
+  fit_resamples(
+    indie_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+
+# plot knn heatmap
+indie_knn %>% get_conf_mat() %>% autoplot(type = "heatmap") + labs(title = "kNN")
+
+# random forest
+forest_model <-
+  rand_forest() %>%
+  set_mode("classification") %>% 
+  set_engine("ranger", importance = "impurity")
+indie_forest <- 
+  workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit_resamples(
+    indie_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+
+# plot random forest heatmap
+indie_forest %>% get_conf_mat() %>% autoplot(type = "heatmap") + labs(title = "Random Forest")
+
+# plot workflow
+workflow() %>% 
+  add_recipe(indie_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit(indie_features) %>% 
+  pluck("fit", "fit", "fit") %>%
+  ranger::importance() %>% 
+  enframe() %>% 
+  mutate(name = fct_reorder(name, value)) %>% 
+  ggplot(aes(name, value)) + 
+  geom_col() + 
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL, y = "Importance", title = "Loudness and acousticness are most important discriminators")
+
+# plot clusters
+indie_features %>%
+  ggplot(aes(x = loudness, y = acousticness, colour = playlist, size = energy)) +
+  geom_point(alpha = 0.8) +
+  scale_color_viridis_d() +
+  theme_minimal() +
+  labs(
+    x = "Loudness",
+    y = "Acousticness",
+    size = "Energy",
+    colour = "Playlist",
+    title = "Visualizing clusters based on loudness and acousticness"
+  ) +
+    annotate("text", x = -24, y = 0.52, label = "opera outliers")  
+```
+For both classifiers, I used **10-fold cross-validation**. As you can see in the heatmaps, both the kNN and the random forest classifier perform very well. As expected (from class), random forest performed slightly better, The **precision** of the musical class even reached 1, meaning that the model never falsely labeled an opera track as a musical track. Consequently, the **recall** of the opera class is 1, which means that all opera tracks were correctly labeled. 
+
+I tried to use the most important discriminators (loudness, timbre feature c01, acousticness, and energy) to improve the **feature selection** process, but it didn't improve. I think this is the case because the models are already very good.
+
+When you look at the **visualization of the clusters**, you understand why the classifiers work so well. There are two very distinct clusters with minimal overlap. The plot also explains why some musical songs get labeled as opera songs in the random forest model. It's interesting to note here that the kNN model makes some wrongfully labels some opera songs as musical songs, although here the opera cluster seems quite clear. The outliers may play a role in this. 
+
+The high performance of the models looks suspicious to me. Because the corpus that I use is rather small, the **external validity** of this result is questionable: I am not sure whether you can generalize this clear distinction between opera and musical songs to a broader scale. The high performance is most likely due to the small corpus. It is however quite nice to see that Spotify's features capture very clear distinctions between the two genres, although the main discriminators are different than what I expected. 
+
+
 ### How does Spotify's valence feature relate to the tempo of a song? Comparing **tempograms** of the musical songs with the highest and lowest valence values in my corpus.
 
 ```{r, fig.show="hold", out.width="50%"}
@@ -100,7 +262,7 @@ jazz %>%
     colour = "Genre",
     size = "Duration (min)",
     alpha = "Volume (dBFS)",
-    title = "Opera songs tend to differ more in tempo within the same track",
+    title = "Opera songs differ more in tempo within the same track",
     subtitle = "Comparing tempo features of opera and musical songs"
   )
 ```
@@ -422,7 +584,10 @@ What you can see in this chromagram is that the two mainly used pitches in the s
 
 When you listen to the two songs, it makes sense that Spotify classifies "Stizzoso, mio stizzoso, voi fate il borioso" to be much happier than "Gluck, das mir verblieb". The former has lots of happy violins in it, while the latter is very melodramatic. 
 
-TO DO: figure out how to make graphs the same size
+### **Conclusion**: what did I learn from this course?
+
+TO DO: write conclusion
+
 
 
 
