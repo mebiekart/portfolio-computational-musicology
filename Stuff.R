@@ -162,4 +162,16 @@ tote_stadt %>%
 
 Here, you see a **chomagram** of the song "Gluck, das mir verblieb" (from the opera *Die Tote Stadt*). The norm for the chroma vectors used here is **euclidean**.
 
+**Typical tracks** \
+Habanera – Carmen: for me, this is a typical opera song with very high notes that everyone knows.\
+La donne e mobile – Rigoletto: again, this is a very famous song. I think the grandeur of this song is typical for opera music. \
+One Day More - Les Miserables: this song is very dramatic and has multiple singers, which is typical for musical songs. \
+You Can't Stop The Beat - Hairspray: the happiness and danceability of this song is typical for musical songs. \ \
+
+**Atypical tracks** \
+Summertime - Porgy and Bess: this is a jazzy song, which is a different genre than most opera songs. \
+Ride of the Valkyries - Die Walkure: this song has no lyrics, which is atypical for an opera song. \
+Totally Fucked - Spring Awakening: this comes close to a rock song, which is a different genre than most musical songs. \
+Land of Lola - Kinky Boots: this song has a strong disco vibe, with more use of electronic instruments than the average musical song.
+
 
