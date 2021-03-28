@@ -11,7 +11,7 @@ output:
 ### What kind of **corpus** did I choose and why?
 
 I have always been fascinated by musicals. More recently, I was introduced to operas and I recognized the same compelling drama I appreciate in musicals. Opera songs and musical songs both mainly serve to tell a story, but have very different styles. I wonder if opera and musical music share certain aspects, because they both have such a strong narrative function. **That is why the main question I want to answer is: "What similarities between musical and opera songs can be found based on Spotify's API?"** \ \
-The corpus that I use for my portfolio consists of 100 opera songs and 100 musical songs, collected from pre-existing playlists that are available on Spotify. I use Spotify's *Opera 100: Spotify Picks* playlist as a basis for my opera playlist. This playlist consists of 97 tracks, so I have added 3 tracks manually, based on Spotify's suggestions. For my musical playlist, I use a public playlist called *BROADWAY MUSICALS*, made by Hugo Torres. Out of all musical playlists I could find, I found this to be the most inclusive. Furthermore, I chose to focus on Broadway musicals (even though I am myself more familiar with musical movies) because they were written to be performed in front of a live audience, just like operas. The original playlist consists of 150 songs, so I manually removed 50 tracks. I chose to remove tracks from musicals which had more tracks in the playlist, in order to create a playlist with as much different musicals as possible. \
+The corpus that I use for my portfolio consists of 100 opera songs and 100 musical songs, collected from pre-existing playlists that are available on Spotify. I use Spotify's *Opera 100: Spotify Picks* playlist as a basis for my opera playlist. This playlist consists of 97 tracks, so I have added 3 tracks manually, based on Spotify's suggestions. For my musical playlist, I use a public playlist called *BROADWAY MUSICALS*, made by Hugo Torres. Out of all musical playlists I could find, I found this to be the most inclusive. Furthermore, I chose to focus on Broadway musicals (even though I am myself more familiar with musical movies) because they were written to be performed in front of a live audience, just like operas. The original playlist consists of 150 songs, so I manually removed 50 tracks. I chose to remove tracks from musicals which had more tracks in the playlist, in order to create a playlist with as much different musicals as possible. The majority of songs in the corpus are studio recordings, but there are some live versions in it as well. \
 
 **Weaknesses of the corpus** \
 Because adding music from *every* opera and musical would create a very big corpus, tracks from some operas and musicals are essentially missing (also because most operas and musicals have had a lot of productions with different artists/conductors/musicians). This means that my corpus does not cover the whole genre. Furthermore, Spotify's pre-existing playlists generally include only the well-known (classical) operas and musicals, leaving out smaller productions. \ \
@@ -22,7 +22,7 @@ In comparing opera tracks with musical tracks, I expect to find a big difference
 Check out the [musical part](https://open.spotify.com/playlist/7A2ifENYPFKuxloYPlYWtZ?si=qrb6LdriTd6-BQXtlyKK0A)  and the [opera part](https://open.spotify.com/playlist/1rM8PQnCL3unpZENj2xdFa?si=yGHvlpXgSvWbteMkRLRrZA) of my corpus.
 
 
-### Are musical songs really happier than opera songs? An **interactive visualization**.
+### Are musical songs really happier than opera songs? Comparing **track-level features** of Spotify's API.
 
 ```{r}
 # Load necessary packages
@@ -91,7 +91,7 @@ Furthermore, as expected, musical songs are generally more danceable than opera 
 
 Take a look at the clear **outliers in both groups**. Memory (from the musical *Cats*) is a particular sad musical song, while Stizzoso, mio stizzoso, voi fate il borioso (from the opera *La Serva Padrona*) is a particular happy opera song (and also turns out to be the most danceable opera song). 
 
-When you look at the loudness feature, you see a big difference between musical and opera songs: *musical songs are much louder than opera songs*. I can imagine that this is the case because musical songs are somewhat more hysterical sometimes, but I did not expect to see a difference this big.
+When you look at the loudness feature, you see a big difference between musical and opera songs: **musical songs are much louder than opera songs**. I can imagine that this is the case because musical songs are somewhat more hysterical sometimes, but I did not expect to see a difference this big.
 
 Because the opera songs are not distributed in an even way, it is hard to see the data. That's why I decided to take a closer look in the next tab. 
 
@@ -248,6 +248,7 @@ jazz %>%
   geom_point(aes(size = duration / 60)) +
   geom_rug() +
   theme_minimal() +
+  theme_plts() +
   ylim(0, 5) +
   labs(
     x = "Mean Tempo (bpm)",
@@ -265,7 +266,7 @@ Here, the **standard deviation** and **mean** of the tempo of songs in the corpu
 
 The graph shows a clear difference between opera and musical songs. We can conclude that **the standard deviation of musical songs is generally smaller than that of opera songs**. This means that, within the same track, opera songs tend to differ more in tempo (i.e., they have obvious slower and faster parts) than musical songs. Musical songs tend to hold on the the same tempo throughout the song. Interesting to note here is that the graph also shows a slight difference in duration for opera and musical songs. Opera songs tend to be longer, so maybe this gives more space to vary in tempo throughout a song.
 
-Furthermore, this graph makes clear that **musical songs tend to have a higher mean tempo than opera songs**. This may be related to the fact that musical songs have a higher danceability according to Spotify's API. There is also a much bigger variation in the mean tempo of musical songs compared to the mean tempo of opera songs, meaning that musical songs differ in tempo more than opera songs. In the interactive visualization that I made, you could also find that musical songs cover a wider range of energy and valence than opera songs do. It could be the case that the range of mean tempo is related to this. 
+Furthermore, this graph makes clear that **musical songs tend to have a higher mean tempo than opera songs**. This may be related to the fact that musical songs have a higher danceability according to Spotify's API. There is also a much bigger variation in the mean tempo of musical songs compared to the mean tempo of opera songs, meaning that musical songs differ in tempo more than opera songs. In the interactive visualization (on the second tab) that I made, you could also find that musical songs cover a wider range of energy and valence than opera songs do. It could be the case that the range of mean tempo is related to this. 
 
 ### How does Spotify's valence feature relate to the tempo of a song? Comparing **tempograms** of the musical songs with the highest and lowest valence values in my corpus.
 
@@ -282,7 +283,8 @@ falling_slowly %>%
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +
   labs(x = "Time (s)", y = "Tempo (BPM)", title = "Low Valence: Falling Slowly") +
-  theme_classic()
+  theme_classic() +
+  theme_plts()
 
 fame <- get_tidy_audio_analysis("7yBl8YmvcgwwYlazJcvowE") 
 
@@ -292,12 +294,14 @@ fame %>%
   geom_raster() +
   scale_fill_viridis_c(guide = "none") +
   labs(x = "Time (s)", y = "Tempo (BPM)", title = "High Valence: Fame") +
-  theme_classic()
+  theme_classic() +
+  theme_plts()
+
 ```
 
 ***
 
-Here, you see tempograms for [Falling Slowly (Once)](https://open.spotify.com/track/2rqU6isUjWk7s2y0ZEkmhb?si=yk7C306BSveqiEV62ztNpg) and [Fame (Fame)](https://open.spotify.com/track/7yBl8YmvcgwwYlazJcvowE?si=4l_o0EHJQtm-xCBuecBHbA). When you look at my interactive plot, you can see that Falling Slowly has the lowest valence value in the musical playlist, while Fame has the highest. There's also a substantial difference in energy values (0.124 for Falling Slowly vs. 0.73 for Fame). I was wondering whether these differences are reflected in the tempograms of the song.
+Here, you see tempograms for [Falling Slowly (Once)](https://open.spotify.com/track/2rqU6isUjWk7s2y0ZEkmhb?si=yk7C306BSveqiEV62ztNpg) and [Fame (Fame)](https://open.spotify.com/track/7yBl8YmvcgwwYlazJcvowE?si=4l_o0EHJQtm-xCBuecBHbA). When you look at my interactive plot, you can see that Falling Slowly has the lowest valence value in the musical playlist, while Fame has the highest. There's also a substantial difference in energy values (0.124 for Falling Slowly vs. 0.73 for Fame). I was wondering whether these differences are reflected in the tempograms of the song. Consequently, this tab shows a little investigation into Spotify's API rather than my corpus.
 
 The short answer is: not really. Both graphs show a clear line at around 250 BPM, indicating that **the mean tempi of the song are close together**. This is reflected in my interactive plot, which shows that Spotify indicates a tempo of 128 BPM for Falling Slowly and a tempo of 131 BPM for Fame. This implies that the bright yellow lines in the tempograms actually are **tempo harmonics**. 
 
@@ -348,7 +352,11 @@ chroma_ssm <- chroma %>%
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "", y = "", title = "Chroma")
+  theme_plts() +
+  labs(x = "", y = "", title = "Chroma") +
+  geom_vline(xintercept = 48, linetype = "dashed", color = "gray95") +
+  geom_vline(xintercept = 124, linetype = "dashed", color = "gray95") +
+  annotate("text", x = 80, y = 200, label = "'I know \n you do!'", color = "white")
 
 timbre <-
   get_tidy_audio_analysis("1RZ6jzlPeEaDeKYe7IJ792") %>% # Change URI.
@@ -385,7 +393,10 @@ timbre_ssm <- timbre %>%
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "", y = "", title = "Timbre")
+  theme_plts() +
+  labs(x = "", y = "", title = "Timbre") +
+  geom_vline(xintercept = 124, linetype = "dashed", color = "gray95") +
+  annotate("text", x = 200, y = 95, label = "dancing scene", color = "white")  
 
 plot(chroma_ssm)
 plot(timbre_ssm)
@@ -393,7 +404,7 @@ plot(timbre_ssm)
 
 ***
 
-Here, you can compare the **chroma-based and timbre-based SSMs** for the song America (West Side Story). The norm used is euclidean, the distance metric used is cosine, and the summary statistic used is root mean square. The Spotify segment used is "bars". You can listen to the song [here](https://open.spotify.com/track/1RZ6jzlPeEaDeKYe7IJ792?si=FZyFmQEIQf25DEVnDXvF7g).
+Here, you can compare the **chroma-based and timbre-based SSMs** for the song [America](https://open.spotify.com/track/1RZ6jzlPeEaDeKYe7IJ792?si=FZyFmQEIQf25DEVnDXvF7g). (West Side Story). The norm used is euclidean, the distance metric used is cosine, and the summary statistic used is root mean square. The Spotify segment used is "bars". 
 
 A few things about these SSMs stand out to me. First, you can see that a very **clear line** appears around 50 seconds in the chroma SSM. This indicates a novelty in the song: at this time point, you can probably hear a unique pitch in the song. When you listen to the song, you can hear that this is indeed a turning point in the song. The time point seems to correspond with the transition of the intro into the first chorus. More specifically, the 50 second time mark precisely corresponds to the "I know you do!" exclamation. Interestingly enough, the timbre SSM does not really show the transition of the intro into the rest of the song.
 
@@ -401,11 +412,9 @@ In the timbre SSM, you can find a **clear line** right at the beginning of the s
 
 Secondly, you can see several **diagonal lines** parallel to the main diagonal from around 120 seconds until the end of the song in the chroma SSM. Diagonal lines indicate repetitions in the song. This pattern makes sense, because from this time mark onward the song basically only consists of repetitions. At 120 seconds, the main instrumental part of the song begins, and this pattern is repeated throughout the song.
 
-Finally, the chroma SSM shows **3 visible distinct parts** of the song. 0-50 seconds indicates the intro of the song. Then, there is a block between 50 and 120 seconds, which consists of the first verses and chorus with relatively few musical instruments. After 120 seconds, the part starts and the energy of the song increases. 
+Finally, the chroma SSM shows **3 visible distinct parts** of the song. 0-50 seconds indicates the intro of the song. Then, there is a block between 50 and 120 seconds, which consists of the first verses and chorus with relatively few musical instruments. After 120 seconds, the third part starts and the energy of the song increases. 
 
 In the timbre SSM, you can see that the song can be divided into **2 main parts**: 0-120 seconds and 120-300 seconds. At 120 seconds, the "big" instruments tune in and the energy is turned up (and the big dancing scene begins). 
-
-
 
 
 ### How well can **classifiers** distinguish between opera and musical songs?
@@ -511,7 +520,7 @@ indie_knn <-
   )
 
 # plot knn heatmap
-indie_knn %>% get_conf_mat() %>% autoplot(type = "heatmap") + labs(title = "kNN")
+indie_knn %>% get_conf_mat() %>% autoplot(type = "heatmap") + labs(title = "kNN") + theme_plts()
 
 # random forest
 forest_model <-
@@ -528,7 +537,7 @@ indie_forest <-
   )
 
 # plot random forest heatmap
-indie_forest %>% get_conf_mat() %>% autoplot(type = "heatmap") + labs(title = "Random Forest")
+indie_forest %>% get_conf_mat() %>% autoplot(type = "heatmap") + labs(title = "Random Forest") + theme_plts()
 
 # plot workflow
 workflow() %>% 
@@ -543,7 +552,8 @@ workflow() %>%
   geom_col() + 
   coord_flip() +
   theme_minimal() +
-  labs(x = NULL, y = "Importance", title = "Loudness and acousticness are most important discriminators")
+  theme_plts() +
+  labs(x = NULL, y = "Importance", title = "Importance of discriminators")
 
 # plot clusters
 indie_features %>%
@@ -551,6 +561,7 @@ indie_features %>%
   geom_point(alpha = 0.8) +
   scale_color_viridis_d() +
   theme_minimal() +
+  theme_plts() +
   labs(
     x = "Loudness",
     y = "Acousticness",
@@ -564,15 +575,27 @@ For both classifiers, I used **10-fold cross-validation**. As you can see in the
 
 I tried to use the most important discriminators (loudness, timbre feature c01, acousticness, and energy) to improve the **feature selection** process, but it didn't improve. I think this is the case because the models are already very good.
 
+It is not surprising to me that acousticness and loudness are the most important discriminators. It makes sense that opera songs are more acoustic than musical songs, and after seeing the big differences in loudness in the second tab, this results does not come as a surprise. However, prior to the first visualization I would not have suspected that the loudness and energy of opera an musical songs serve as big discriminators.
+
+I was surprised to find that the importance of tempo in discriminating between the genres is so low, considering that we have seen that the mean tempo of musical songs is quite higher than that of opera songs. 
+
 When you look at the **visualization of the clusters**, you understand why the classifiers work so well. There are two very distinct clusters with minimal overlap. The plot also explains why some musical songs get labeled as opera songs in the random forest model. It's interesting to note here that the kNN model makes some wrongfully labels some opera songs as musical songs, although here the opera cluster seems quite clear. The outliers may play a role in this. 
 
 The high performance of the models looks suspicious to me. Because the corpus that I use is rather small, the **external validity** of this result is questionable: I am not sure whether you can generalize this clear distinction between opera and musical songs to a broader scale. The high performance is most likely due to the small corpus. It is however quite nice to see that Spotify's features capture very clear distinctions between the two genres, although the main discriminators are different than what I expected. 
 
 
 
-### **Conclusion**: what did I learn from this course?
+### **Conclusion**: are there any similarities between opera songs and musical songs?
 
-TO DO: write conclusion
+After building my portfolio, I can conclude that there are **no noticeable similarities between the opera and musical songs in my corpus** based on Spotify's API. Especially the fact that the kNN and random forest classifier performed so well tells me that Spotify can distinguish really well between the two genres.
+
+I expected to find similarities in loudness and energy based on my initial intuition, but they both turned out to be quite important discriminators. Given that I do not have any musical background (other than enjoying listening to music), it is however no surprise that my intuition was flawed. 
+
+I presented contradictory findings concerning the tempo feature: on the one hand, it seemed like the mean tempo of opera songs is quite lower than that of musical songs. On the other hand, the list of discriminators based on the random forest classifier showed that tempo was not an important discriminator. Therefore, I cannot draw an evident conclusion.
+
+Furthermore, I have presented a very small investigation into Spotify's valence feature, independent of the rest of my portfolio. This investigation showed that there is no clear relation between valence and tempo of songs. However, it is way to rigorous to draw a general conclusion based on only one example. 
+
+This leads me to the more general point that my corpus is very limited and therefore does not represent *all* opera and musical music. Therefore, I cannot with certainty conclude that there are no similarities between opera and musical songs *in general*. However, I am quite confident that this portfolio shows that there are way more differences than similarities between the two. I guess that both opera and musical songs serve to tell a story, but they do so in a very different manner. 
 
 
 
